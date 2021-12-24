@@ -27,7 +27,7 @@ Attributes that one needs tweak often are tagged with # ***
 # ----------------------------------------------------------------------------------
 
 # ----------------------- PATH DRONES -----------------------------------------#
-SWEEP_PATH = True
+SWEEP_PATH = False
 LENGHT_METERS_TOUR = 30000 # (DO NOT CHANGE)
 HOVERING = 600  # int : steps of hovering
 CIRCLE_PATH = False # bool: whether to use cirlce paths around the depot
@@ -46,7 +46,7 @@ DEBUG = True                         # bool: whether to print debug strings or n
 EXPERIMENTS_DIR = "data/experiments/"  # output data : the results of the simulation
 
 # drawaing
-PLOT_SIM = True      # bool: whether to plot or not the simulation.
+PLOT_SIM = False      # bool: whether to plot or not the simulation.
 WAIT_SIM_STEP = 0     # float: seconds, pauses the rendering for 'DELAY_PLOT' seconds.
 SKIP_SIM_STEP = 5     # int: steps, plot the simulation every 'RENDERING_STEP' steps. At least 1.
 DRAW_SIZE = 700       # int: size of the drawing window.

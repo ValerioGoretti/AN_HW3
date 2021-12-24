@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="62ceb0dd-680d-4632-b0ad-ae10cdda4eda" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/DroNETworkSimulator-hmw3/DroNETworkSimulator-hmw3/src/routing_algorithms/AI_Collision.py" beforeDir="false" afterPath="$PROJECT_DIR$/DroNETworkSimulator-hmw3/DroNETworkSimulator-hmw3/src/routing_algorithms/AI_Collision.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DroNETworkSimulator-hmw3/DroNETworkSimulator-hmw3/src/routing_algorithms/ai_routing.py" beforeDir="false" afterPath="$PROJECT_DIR$/DroNETworkSimulator-hmw3/DroNETworkSimulator-hmw3/src/routing_algorithms/ai_routing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DroNETworkSimulator-hmw3/DroNETworkSimulator-hmw3/src/utilities/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/DroNETworkSimulator-hmw3/DroNETworkSimulator-hmw3/src/utilities/config.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="22gR4dO3y8UhzoA6uBtvdNp8kZq" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.General" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="62ceb0dd-680d-4632-b0ad-ae10cdda4eda" name="Default Changelist" comment="" />
+      <created>1640257053881</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1640257053881</updated>
+      <workItem from="1640257058385" duration="2663000" />
+      <workItem from="1640366618079" duration="427000" />
+      <workItem from="1640367065185" duration="3957000" />
+      <workItem from="1640382138926" duration="2074000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="93" y="93" width="1095" height="487" key="DiffContextDialog" timestamp="1640382056030">
+      <screen x="0" y="0" width="1280" height="672" />
+    </state>
+    <state x="93" y="93" width="1095" height="487" key="DiffContextDialog/0.0.1280.672/1920.0.1680.1002@0.0.1280.672" timestamp="1640382056030" />
+    <state x="142" y="0" key="SettingsEditor" timestamp="1640382055436">
+      <screen x="0" y="0" width="1280" height="672" />
+    </state>
+    <state x="142" y="0" key="SettingsEditor/0.0.1280.672/1920.0.1680.1002@0.0.1280.672" timestamp="1640382055436" />
+    <state x="2267" y="-14" width="934" height="660" maximized="true" key="dock-window-1" timestamp="1640382437828">
+      <screen x="1920" y="0" width="1680" height="1002" />
+    </state>
+    <state x="2267" y="-14" width="934" height="660" maximized="true" key="dock-window-1/0.0.1280.672/1920.0.1680.1002@0.0.1280.672" timestamp="1640382437828" />
+    <state x="303" y="-1" width="672" height="678" key="search.everywhere.popup" timestamp="1640381994285">
+      <screen x="0" y="0" width="1280" height="672" />
+    </state>
+    <state x="303" y="-1" width="672" height="678" key="search.everywhere.popup/0.0.1280.672/1920.0.1680.1002@0.0.1280.672" timestamp="1640381994285" />
+  </component>
+</project>

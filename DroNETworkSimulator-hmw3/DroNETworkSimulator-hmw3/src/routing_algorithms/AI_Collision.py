@@ -16,7 +16,6 @@ class AI_Collision_1811110(BASE_routing):
         self.taken_actions = {}
         #Path of the drone
         self.drone_path=[]
-        self.counter=0
         #Set of all the collisions
         self.set_collision=set({})
         #Set of all the visited waypoints
