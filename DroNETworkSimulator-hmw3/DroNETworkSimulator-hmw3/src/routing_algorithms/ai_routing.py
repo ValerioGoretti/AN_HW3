@@ -34,6 +34,15 @@ class AIRouting(BASE_routing):
         # dictionary to store evaluation info {timestep : reward}
         self.evaluation_dict = {}
 
+
+        ''' Second Q learning '''
+        # list for the Q table (every drone has its own list, where each element is a possible action,
+        # and the + 1 is for the action of coming back to the  closest depot
+        self.q_list = [0 for d in range(config.N_DRONES + 1)]
+
+
+
+
     def feedback(self, drone, id_event, delay, outcome, depot_index=None):
         """ return a possible feedback, if the destination drone has received the packet """
         '''if config.DEBUG:
@@ -90,8 +99,6 @@ class AIRouting(BASE_routing):
         if id_event in self.packet_set and drone == self.drone:
             self.packet_generation = [x for x in self.packet_generation if x[0].event_ref.identifier != id_event]
             self.packet_generation = sorted(self.packet_generation,key=lambda x: x[1])
-
-
 
 
 
@@ -164,6 +171,27 @@ class AIRouting(BASE_routing):
                     self.last_choice_index = 0
                     return None
 
+        # Q-learning on collisions
+        if len(opt_neighbors) > 0:
+            print("Azione presa dal q_learning sulle collisioni")
+            is_random_choice = random.choices([True, False], weights=(10, 90), k=1)[0]
+            # get the indeces of possible actions
+            action_list = self.get_actions(opt_neighbors)
+            if cell_index not in [x for x in range(4, 12)]:
+                action_list.append(self.closest_depot(self.drone))
+            if is_random_choice:
+                action = random.choice(action_list)
+                # azione da registrare
+                if action != pkd.hops[-1]:
+                    return action
+                else:
+                    return None
+            else:
+                # azione da registrare
+                return self.q_list.index(max(self.q_list))
+
+
+
         action = None
 
         # self.drone.history_path (which waypoint I traversed. We assume the mission is repeated)
@@ -182,6 +210,13 @@ class AIRouting(BASE_routing):
         # -2 --> move to second depot (self.simulator.depot.list_of_coords[1]
         # 0, ... , self.ndrones --> send packet to this drone
         return None  # here you should return a drone object!
+
+
+    # function to get the avaiable actions index
+    def get_actions(self, neighbors):
+        action_list = [drone for hpk, drone in neighbors]
+        action_list.append(None)
+        return action_list
 
     # function used to knwo when the simulation is going to end , and its time to come back to the depot
     def is_time_to_goback(self):

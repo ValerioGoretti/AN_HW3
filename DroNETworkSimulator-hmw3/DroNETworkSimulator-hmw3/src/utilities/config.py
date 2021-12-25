@@ -46,7 +46,7 @@ DEBUG = True                         # bool: whether to print debug strings or n
 EXPERIMENTS_DIR = "data/experiments/"  # output data : the results of the simulation
 
 # drawaing
-PLOT_SIM = False      # bool: whether to plot or not the simulation.
+PLOT_SIM = True      # bool: whether to plot or not the simulation.
 WAIT_SIM_STEP = 0     # float: seconds, pauses the rendering for 'DELAY_PLOT' seconds.
 SKIP_SIM_STEP = 5     # int: steps, plot the simulation every 'RENDERING_STEP' steps. At least 1.
 DRAW_SIZE = 700       # int: size of the drawing window.
@@ -60,7 +60,7 @@ SAVE_PLOT_DIR = "data/plots/"
 # ----------------------------- SIMULATION PARAMS. ---------------------------- #
 SIM_DURATION = 15000 # int: steps of simulation. # ***
 TS_DURATION = 0.150   # float: seconds duration of a step in seconds.
-SEED = 2            # int: seed of this simulation.
+SEED = 5            # int: seed of this simulation.
 
 N_DRONES = 4  # int: number of drones. # ***
 ENV_WIDTH = 1500      # float: meters, width of environment.
@@ -133,4 +133,4 @@ NN_MODEL_PATH = "data/nnmodels/"
 
 # --------------- new cell probabilities -------------- #
 CELL_PROB_SIZE_R = 1.875  # the percentage of cell size with respect to drone com range
-ENABLE_PROBABILITIES = False  # is slow when you use True!
+ENABLE_PROBABILITIES = True  # is slow when you use True!
