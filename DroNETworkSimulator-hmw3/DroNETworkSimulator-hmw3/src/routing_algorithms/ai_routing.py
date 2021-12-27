@@ -18,7 +18,7 @@ class AIRouting(BASE_routing):
         # list of the currently holded packets, sorted by their generation timestep
         self.packet_generation = []
         # dictionary for the Q table
-        self.q_dict = {None: [0, 0]}
+        self.q_dict = {None: [0, 0, 0]}
         # gamma parameter for the Bellman formula
         self.gamma = 0.8
         # alpha parameter for the Bellman formula
@@ -33,13 +33,6 @@ class AIRouting(BASE_routing):
         self.last_choice_index = None
         # dictionary to store evaluation info {timestep : reward}
         self.evaluation_dict = {}
-
-
-        ''' Second Q learning '''
-        # list for the Q table (every drone has its own list, where each element is a possible action,
-        # and the + 1 is for the action of coming back to the  closest depot
-        self.q_list = [0 for d in range(config.N_DRONES + 1)]
-
 
 
 
@@ -78,8 +71,11 @@ class AIRouting(BASE_routing):
                 pk_state_delivered_num = len(pk_state_delivered)
                 # percentage of packets delivered
                 delivered_packets_percent = (pk_state_delivered_num * 100) / pk_state_num
+                # TODO: set the correct depot (to do outside of for statement) set the farthest point of each depot
                 # maximum time the drone would take to go and return to the depot from the farthest point of the map
                 max_time = self.get_max_time_to_depot_and_return(drone, self.closest_depot(drone))
+                print(self.drone.identifier, " ", max_time)
+                print()
                 # call to the reward function
                 reward = self.reward_function(delivered_packets_percent, max_time)
                 # formula for updating the Q table
@@ -94,6 +90,9 @@ class AIRouting(BASE_routing):
             self.state_action_list = []
             # empty state action packets dict
             self.state_action_packets = {}
+            print()
+            print("drone: ", self.drone.identifier)
+            print(self.q_dict)
 
         # update of the list of the packet sorted by their generation
         if id_event in self.packet_set and drone == self.drone:
@@ -132,7 +131,8 @@ class AIRouting(BASE_routing):
 
         # if the simulation is about to end the drone takes its packets to the depot
         if self.is_time_to_goback():
-            return -1
+            dest_depot_action = -1 if self.closest_depot(self.drone) == (750, 0) else -2
+            return dest_depot_action
 
         # if a packet is expiring apply the reinforcement learning
         if self.packet_generation != [] and self.is_packet_expiring(self.packet_generation[0][0]) and self.last_choice_index != 1:
@@ -142,13 +142,18 @@ class AIRouting(BASE_routing):
                     # choose a random action (action_index => index of the action in Q_table, 0 for None, 1 for -1)
                     action_index = random.choice([0, 1])
                     # add the new state to the dict
-                    self.q_dict[cell_index] = [0, 0]
+                    self.q_dict[cell_index] = [0, 0, 0]
                 # if the state already exists choose the best action in q_dict
                 else:
                     is_random_choice = random.choices([True, False], weights=(10, 90), k=1)[0]
-                    if is_random_choice or self.q_dict[cell_index][0] == self.q_dict[cell_index][1]:
+                    if is_random_choice or self.q_dict[cell_index][0] == self.q_dict[cell_index][1] == self.q_dict[cell_index][1]:
+                        # make a random choice, 0 for keeping the packets, 1 for coming back to depot
                         action_index = random.choice([0, 1])
+                        if action_index == 1:
+                            # randomly chooses which depot to go to
+                            action_index = random.choice([1, 2])
                     else:
+                        # make the best choice among those available
                         action_index = self.q_dict[cell_index].index(max(self.q_dict[cell_index]))
 
                 # add the new (state, action) tuple to be updated
@@ -157,39 +162,20 @@ class AIRouting(BASE_routing):
                 # store all the packets that the drone has when it takes an action
                 self.state_action_packets[cell_index] = [x.event_ref.identifier for x in self.drone.all_packets()]
 
-                if action_index == 1:
-                    # get the closest depot coords from drone current position
-                    closest_depot = self.closest_depot(self.drone)
-                    # store the time needed to go and return to depot from this point
-                    self.final_time_to_depot = self.time_to_depot_and_return(self.drone, closest_depot)
+                if action_index == 1 or action_index == 2:
+                    # set the index of the last choice made, 1 for coming back to one depot
                     self.last_choice_index = 1
-                    if closest_depot == (750, 0):
-                        return -1
-                    else:
-                        return -2
+                    # set the destination depot
+                    destination_depot_action = -1 if action_index == 1 else -2
+                    # set the destination depot coords
+                    destination_depot_coords = (750, 0) if action_index == 1 else (750, 1400)
+                    # store the time needed to go and return to depot from the current point
+                    self.final_time_to_depot = self.time_to_depot_and_return(self.drone, destination_depot_coords)
+                    return destination_depot_action
                 else:
+                    # set the index of the last choice made, 0 for keeping the packet
                     self.last_choice_index = 0
                     return None
-
-        # Q-learning on collisions
-        if len(opt_neighbors) > 0:
-            print("Azione presa dal q_learning sulle collisioni")
-            is_random_choice = random.choices([True, False], weights=(10, 90), k=1)[0]
-            # get the indeces of possible actions
-            action_list = self.get_actions(opt_neighbors)
-            if cell_index not in [x for x in range(4, 12)]:
-                action_list.append(self.closest_depot(self.drone))
-            if is_random_choice:
-                action = random.choice(action_list)
-                # azione da registrare
-                if action != pkd.hops[-1]:
-                    return action
-                else:
-                    return None
-            else:
-                # azione da registrare
-                return self.q_list.index(max(self.q_list))
-
 
 
         action = None
@@ -218,17 +204,17 @@ class AIRouting(BASE_routing):
         action_list.append(None)
         return action_list
 
-    # function used to knwo when the simulation is going to end , and its time to come back to the depot
+    # function used to know when the simulation is going to end , and its time to come back to the depot
     def is_time_to_goback(self):
-        time_expected = self.arrival_time(self.drone)
+        time_expected = self.arrival_time(self.drone, self.closest_depot(self.drone))
         end_expected = self.simulator.len_simulation * self.simulator.time_step_duration - (
                     self.simulator.cur_step * self.simulator.time_step_duration)
         return time_expected > end_expected
 
     # function used to know if from the next target i have enough time to come back
-    def arrival_time(self, drone):
+    def arrival_time(self, drone, depot_coords):
         tot = (util.euclidean_distance(drone.next_target(), drone.coords) / drone.speed) + (
-                    util.euclidean_distance(drone.next_target(), self.closest_depot(self.drone)) / drone.speed)
+                    util.euclidean_distance(drone.next_target(), depot_coords) / drone.speed)
         return tot
 
     # function that return the closest depot from the drone position
@@ -250,8 +236,9 @@ class AIRouting(BASE_routing):
     # function that says if a pkd is expiring
     def is_packet_expiring(self, pkd):
         time_left = 8000 * self.simulator.time_step_duration - (self.simulator.cur_step * self.simulator.time_step_duration - pkd.time_step_creation * self.simulator.time_step_duration)
-        expected_time = self.arrival_time(self.drone)
-        return expected_time > time_left
+        expected_time_depot1 = self.arrival_time(self.drone, (750, 0))
+        expected_time_depot2 = self.arrival_time(self.drone, (750, 1400))
+        return expected_time_depot1 > time_left or expected_time_depot2 > time_left
 
     # reward -> { delivered_packets_percent = percentage of delivered packets,
     #             final_time_to_depot = time spent to go and return from depot,
