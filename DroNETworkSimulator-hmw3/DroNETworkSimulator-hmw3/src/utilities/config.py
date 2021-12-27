@@ -27,7 +27,7 @@ Attributes that one needs tweak often are tagged with # ***
 # ----------------------------------------------------------------------------------
 
 # ----------------------- PATH DRONES -----------------------------------------#
-SWEEP_PATH = False
+SWEEP_PATH = True
 LENGHT_METERS_TOUR = 30000 # (DO NOT CHANGE)
 HOVERING = 600  # int : steps of hovering
 CIRCLE_PATH = False # bool: whether to use cirlce paths around the depot
@@ -58,7 +58,7 @@ SAVE_PLOT_DIR = "data/plots/"
 
 # add constants here...
 # ----------------------------- SIMULATION PARAMS. ---------------------------- #
-SIM_DURATION = 15000 # int: steps of simulation. # ***
+SIM_DURATION = 50000 # int: steps of simulation. # ***
 TS_DURATION = 0.150   # float: seconds duration of a step in seconds.
 SEED = 5            # int: seed of this simulation.
 
@@ -133,4 +133,4 @@ NN_MODEL_PATH = "data/nnmodels/"
 
 # --------------- new cell probabilities -------------- #
 CELL_PROB_SIZE_R = 1.875  # the percentage of cell size with respect to drone com range
-ENABLE_PROBABILITIES = True  # is slow when you use True!
+ENABLE_PROBABILITIES = False  # is slow when you use True!
