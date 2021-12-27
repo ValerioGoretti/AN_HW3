@@ -4,6 +4,7 @@ from src.routing_algorithms.georouting_w_move import GeoMoveRouting
 from src.routing_algorithms.random_routing import RandomRouting
 from src.routing_algorithms.closeset_to_me_routing import CloRouting
 from src.routing_algorithms.ai_routing import AIRouting
+from src.routing_algorithms.AI_Collision import AI_Collision_1811110
 
 from enum import Enum
 
@@ -42,7 +43,7 @@ RANDOM_START_POINT = True  # bool whether the drones start the mission at random
 
 # ------------------------------- CONSTANTS ------------------------------- #
 
-DEBUG = True                         # bool: whether to print debug strings or not.
+DEBUG = False                         # bool: whether to print debug strings or not.
 EXPERIMENTS_DIR = "data/experiments/"  # output data : the results of the simulation
 
 # drawaing
@@ -62,7 +63,7 @@ SIM_DURATION = 15000 # int: steps of simulation. # ***
 TS_DURATION = 0.150   # float: seconds duration of a step in seconds.
 SEED = 2            # int: seed of this simulation.
 
-N_DRONES = 4  # int: number of drones. # ***
+N_DRONES = 2  # int: number of drones. # ***
 ENV_WIDTH = 1500      # float: meters, width of environment.
 ENV_HEIGHT = 1500     # float: meters, height of environment.
 
@@ -95,7 +96,7 @@ class RoutingAlgorithm(Enum):
     RND = RandomRouting
     MGEO = GeoMoveRouting
     CLO = CloRouting
-    AI = AIRouting
+    AI = AI_Collision_1811110
 
     @staticmethod
     def keylist():

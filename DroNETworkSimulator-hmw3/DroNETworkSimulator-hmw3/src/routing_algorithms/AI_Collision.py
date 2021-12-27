@@ -45,7 +45,7 @@ class AI_Collision_1811110(BASE_routing):
         self.gamma=0.8
         #Dictionary for the convergence test
         self.reward_dictionary={}
-    def feedback(self, drone, id_event, delay, outcome):
+    def feedback(self, drone, id_event, delay, outcome, depot_index=None):
         """ return a possible feedback, if the destination drone has received the packet """
         if config.DEBUG:
             print("Drone: ", self.drone.identifier, "---------- has delivered: ", self.taken_actions)
@@ -80,6 +80,7 @@ class AI_Collision_1811110(BASE_routing):
     def relay_selection(self, opt_neighbors, pkd):
         """ arg min score  -> geographical approach, take the drone closest to the depot """
         #Current cell/state
+        
         cell_index = util.TraversedCells.coord_to_cell(size_cell=self.simulator.prob_size_cell,
                                                         width_area=self.simulator.env_width,
                                                         x_pos=self.drone.coords[0],  # e.g. 1500
@@ -99,14 +100,16 @@ class AI_Collision_1811110(BASE_routing):
         pkd.hops.add(self.drone.identifier)
         #If there are 10 or more packets, come back
         if len(self.packet_generation)>=10:
+            #TODO AI MARCO---------------------------------------
             return-1
         #When the simulation is going to end, come back
+        #TODO NUOVO IS TIME TO GO BACK---------------------------
         if self.is_time_to_goback():
             return -1
         #Set of the first waypoint
         if self.first_waypoint==None:
             self.first_waypoint=self.drone.next_target()
-        #--------------Code used for determine at what point of the mission the drone is
+        #--------------Code used to determine in what point of the mission the drone is
         globalhistory=self.drone.waypoint_history
         localHistory=[]            
         for point in reversed(globalhistory):
@@ -129,10 +132,12 @@ class AI_Collision_1811110(BASE_routing):
             self.counter+=1
             if self.drone_path.index(self.drone.next_target()) == 0 and self.drone.buffer_length() >= 3:
                 return -1
-        if self.drone.next_target()==self.simulator.depot.coords:
+        if self.drone.next_target()==self.simulator.depot.list_of_coords[0]:
             return -1
         #Code used for the AI choice, when there is a collision
         drone=None
+       # if self.drone.identifier==0:
+        #    print(self.check_near_upper_depot())
         if len(opt_neighbors)>0:
             #If the drone has never received the pkd....
             if self.drone_not_seen([v[1] for v in opt_neighbors],pkd):
@@ -165,15 +170,18 @@ class AI_Collision_1811110(BASE_routing):
                 self.correct_trasmission_error(pkd,cell_index)
         return drone # here you should return a drone object!
     #Function used to know if from the next target i have enough time to come back
+    #TODO CAMBIARE CON VERSIONE NUOVA
     def arrival_time(self, drone):
-        tot=(util.euclidean_distance(drone.next_target(), drone.coords) / drone.speed)+(util.euclidean_distance(drone.next_target(), self.simulator.depot.coords)/drone.speed)
+        tot=(util.euclidean_distance(drone.next_target(), drone.coords) / drone.speed)+(util.euclidean_distance(drone.next_target(), self.simulator.depot.list_of_coords[0])/drone.speed)
         return tot 
     #Function used to knwo when the simulation is going to end , and its time to come back to the depot
+    #TODO CAMBIARE CON VERSIONE NUOVA
     def is_time_to_goback(self):
         time_expected=self.arrival_time(self.drone)
         end_expected=self.simulator.len_simulation*self.simulator.time_step_duration-(self.simulator.cur_step*self.simulator.time_step_duration)
         return time_expected>end_expected
     #Function that says if a pkd is expiring
+    #TODO ELIMINARE
     def is_packet_expiring(self,pkd):
         time_left=8000*self.simulator.time_step_duration-(self.simulator.cur_step*self.simulator.time_step_duration-pkd.time_step_creation*self.simulator.time_step_duration)
         expected_time=self.arrival_time(self.drone)
@@ -285,3 +293,9 @@ class AI_Collision_1811110(BASE_routing):
         if aprox_step not in self.reward_dictionary.keys():
             self.reward_dictionary[aprox_step]=[]
         self.reward_dictionary[aprox_step].append(reward)
+    def is_coming_back(self):
+        return self.drone.next_target()==self.simulator.depot.list_of_coords[0] or self.drone.next_target()==self.simulator.depot.list_of_coords[1]
+    def check_near_upper_depot(self):
+        print("----------------",self.drone.next_target()[1],int(self.drone.coords[1]),self.drone.buffer_length())
+        return self.drone.next_target()[1]<self.drone.return_coords[1] and self.drone.buffer_length() >= 3
+  
