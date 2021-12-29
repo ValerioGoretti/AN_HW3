@@ -45,12 +45,28 @@ class AI_Collision_1811110(BASE_routing):
         self.gamma=0.8
         #Dictionary for the convergence test
         self.reward_dictionary={}
+##############################################################
+        # dictionary for the Q table
+        self.q_dict = {None: [0, 0, 0]}
+        # list to store the sequence of (state, action) that must get a reward
+        self.state_action_list = []
+        # dict to store the list of packages that the drone had in a specific state
+        self.state_action_packets = {}
+        # final time spent to go and return from depot
+        self.final_time_to_depot = 0
+        # last choice made by AI
+        self.last_choice_index = None
+        # dictionary to store evaluation info {timestep : reward}
+        self.evaluation_dict = {}
     def feedback(self, drone, id_event, delay, outcome, depot_index=None):
         """ return a possible feedback, if the destination drone has received the packet """
         if config.DEBUG:
             print("Drone: ", self.drone.identifier, "---------- has delivered: ", self.taken_actions)
             print("Drone: ", self.drone.identifier, "---------- just received a feedback:",
                   "Drone:", drone, " - id-event:", id_event, " - delay:",  delay, " - outcome:", outcome)
+
+        self.q_back_feedback(drone)
+
         actual_time=self.simulator.cur_step
         #Update of the list of the packet sorted by their generation
         if id_event in self.packet_set and drone==self.drone:
@@ -85,6 +101,10 @@ class AI_Collision_1811110(BASE_routing):
                                                         width_area=self.simulator.env_width,
                                                         x_pos=self.drone.coords[0],  # e.g. 1500
                                                         y_pos=self.drone.coords[1])[0]  # e.g. 500
+
+        #If there are 10 or more packets, come back
+        if self.last_choice_index != 1 and self.last_choice_index != 2 and self.drone.buffer_length() >= 3 or self.last_choice_index == 0:
+            return self.q_back(cell_index)
         #Update of the next state, for the previous actions
         self.update_next_state(cell_index)
         #Inizialition of the taken_actions dictionary for the current cell
@@ -98,10 +118,6 @@ class AI_Collision_1811110(BASE_routing):
             self.packet_generation=sorted(self.packet_generation,key=lambda x: x[1])
         #The drone is added into the packet hops
         pkd.hops.add(self.drone.identifier)
-        #If there are 10 or more packets, come back
-        if len(self.packet_generation)>=10:
-            #TODO AI MARCO---------------------------------------
-            return-1
         #When the simulation is going to end, come back
         if self.is_time_to_goback():
             dest_depot_action = -1 if self.closest_depot(self.drone) == (750, 0) else -2
@@ -170,6 +186,108 @@ class AI_Collision_1811110(BASE_routing):
             if self.already_chosen_check(pkd):
                 self.correct_trasmission_error(pkd,cell_index)
         return drone # here you should return a drone object!
+
+    def q_back(self, cell_index):
+        # TODO mettere fuori dalla funzione
+        # if a packet is expiring apply the reinforcement learning
+        # check if the drone has already taken an action in this sequence for the current state (cell)
+        if cell_index not in [x[0] for x in self.state_action_list]:
+            if cell_index not in self.q_dict.keys():
+                # choose a random action (action_index => index of the action in Q_table, 0 for None, 1 for -1)
+                action_index = random.choice([0, 1])
+                if action_index == 1:
+                    # randomly chooses which depot to go to
+                    action_index = random.choice([1, 2])
+                # add the new state to the dict
+                self.q_dict[cell_index] = [0, 0, 0]
+            # if the state already exists choose the best action in q_dict
+            else:
+                is_random_choice = random.choices([True, False], weights=(10, 90), k=1)[0]
+                if is_random_choice or self.q_dict[cell_index][0] == self.q_dict[cell_index][1] == self.q_dict[cell_index][2]:
+                    # make a random choice, 0 for keeping the packets, 1 for coming back to depot
+                    action_index = random.choice([0, 1])
+                    if action_index == 1:
+                        # randomly chooses which depot to go to
+                        action_index = random.choice([1, 2])
+                else:
+                    # make the best choice among those available
+                    action_index = self.q_dict[cell_index].index(max(self.q_dict[cell_index]))
+
+            # add the new (state, action) tuple to be updated
+            self.state_action_list.append((cell_index, action_index, self.simulator.cur_step))
+
+            # store all the packets that the drone has when it takes an action
+            self.state_action_packets[cell_index] = [x.event_ref.identifier for x in self.drone.all_packets()]
+
+            if action_index == 1 or action_index == 2:
+                # set the index of the last choice made, 1 for coming back to one depot
+                self.last_choice_index = action_index
+                # set the destination depot
+                destination_depot_action = -1 if action_index == 1 else -2
+                # set the destination depot coords
+                destination_depot_coords = (750, 0) if action_index == 1 else (750, 1400)
+                # store the time needed to go and return to depot from the current point
+                self.final_time_to_depot = self.time_to_depot_and_return(self.drone, destination_depot_coords)
+                return destination_depot_action
+            else:
+                # set the index of the last choice made, 0 for keeping the packet
+                self.last_choice_index = 0
+                return None
+
+    def q_back_feedback(self, drone):
+        # if the last choice was taken by the AI and the buffer length is larger than 0,
+        # then update Q table for all (state, action) in the sequence without reward
+        if self.drone.buffer_length() != 0 and drone == self.drone and self.last_choice_index == 1 or self.last_choice_index == 2:
+            # set the future state for the final (state, action) in the sequence
+            future_state = None
+            # packets delivered when the drone moved directly to the depot
+            delivered_packets = set([x.event_ref.identifier for x in drone.all_packets()])
+            # empty the packets buffer
+            drone.empty_buffer()
+            # get the destination depot from the last_choice_index
+            destination_depot = (750, 0) if self.last_choice_index == 1 else (750, 1400)
+            # maximum time the drone would take to go and return to the depot from the farthest point of the map
+            max_time = self.get_max_time_to_depot_and_return(drone, destination_depot)
+            # set the last choice made to none
+            self.last_choice_index = None
+            print(drone, self.state_action_list)
+            for state, action_index, step in reversed(self.state_action_list):
+                # packets that the drone had in a specific state
+                pk_state = set(self.state_action_packets[state])
+                # number of packets that the drone had in this state
+                pk_state_num = len(pk_state)
+                # delivered packets among those the drone had
+                pk_state_delivered = pk_state.intersection(delivered_packets)
+                # number of packets delivered among those the drone had
+                pk_state_delivered_num = len(pk_state_delivered)
+                # percentage of packets delivered
+                delivered_packets_percent = (pk_state_delivered_num * 100) / pk_state_num
+                # call to the reward function
+                reward = self.reward_function_back(delivered_packets_percent, max_time)
+                # formula for updating the Q table
+                self.q_dict[state][action_index] = self.q_dict[state][action_index] + self.alpha * (reward + self.gamma * max(self.q_dict[future_state]) - self.q_dict[state][action_index])
+                # updating of the evaluation dictionary
+                self.evaluation_dict[step] = reward
+                # set the next future state
+                future_state = state
+            # set the final time to 0
+            self.final_time_to_depot = 0
+            # empty state action
+            self.state_action_list = []
+            # empty state action packets dict
+            self.state_action_packets = {}
+
+    # function to get the time that a drone would spend to go and return to depot from the farthest point of the map
+    def get_max_time_to_depot_and_return(self, drone, depot_coords):
+        if depot_coords == (750, 0):
+            return ((util.euclidean_distance(depot_coords, (0, 1500))) / drone.speed) * 2
+        else:
+            return ((util.euclidean_distance(depot_coords, (0, 0))) / drone.speed) * 2
+
+    # function to get the time that a drone spend to go and return to depot from its current position
+    def time_to_depot_and_return(self, drone, depot_coords):
+        return (util.euclidean_distance(depot_coords, drone.coords) / drone.speed) * 2
+
     #Function used to know if from the next target i have enough time to come back
     def arrival_time(self, drone, depot_coords):
         tot = (util.euclidean_distance(drone.next_target(), drone.coords) / drone.speed) + (
@@ -181,6 +299,14 @@ class AI_Collision_1811110(BASE_routing):
         end_expected = self.simulator.len_simulation * self.simulator.time_step_duration - (
                     self.simulator.cur_step * self.simulator.time_step_duration)
         return time_expected > end_expected
+
+    # function that return the closest depot from the drone position
+    def closest_depot(self, drone):
+        if (util.euclidean_distance(self.simulator.depot.list_of_coords[0], drone.coords) <
+                util.euclidean_distance(self.simulator.depot.list_of_coords[1], drone.coords)):
+            return self.simulator.depot.list_of_coords[0]  # which depot to refer, based on my position
+        else:
+            return self.simulator.depot.list_of_coords[1]  # which depo
 
     '''Function that says if a pkd is expiring
     def is_packet_expiring(self,pkd):
@@ -261,7 +387,14 @@ class AI_Collision_1811110(BASE_routing):
         if outcome==-1:
             return -1
         else:
-            return 1-(delay/8000) 
+            return 1-(delay/8000)
+
+    # reward -> { delivered_packets_percent = percentage of delivered packets,
+    #             final_time_to_depot = time spent to go and return from depot,
+    #             max_time = maximum time to go and return to depot from the farthest point of the map }
+    def reward_function_back(self, delivered_packets_percent, max_time):
+        return (delivered_packets_percent / 100) - self.alpha * (self.final_time_to_depot / max_time)
+
     #Function used to update the q_table when a new reward about a (state,action) tuple is given     
     def update_q_table(self,state,action,next_state,reward):
         qSa=self.qTable_dictionary[(state,action)]

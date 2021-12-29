@@ -28,7 +28,7 @@ Attributes that one needs tweak often are tagged with # ***
 # ----------------------------------------------------------------------------------
 
 # ----------------------- PATH DRONES -----------------------------------------#
-SWEEP_PATH = True
+SWEEP_PATH = False
 LENGHT_METERS_TOUR = 30000 # (DO NOT CHANGE)
 HOVERING = 600  # int : steps of hovering
 CIRCLE_PATH = False # bool: whether to use cirlce paths around the depot
@@ -61,9 +61,9 @@ SAVE_PLOT_DIR = "data/plots/"
 # ----------------------------- SIMULATION PARAMS. ---------------------------- #
 SIM_DURATION = 15000 # int: steps of simulation. # ***
 TS_DURATION = 0.150   # float: seconds duration of a step in seconds.
-SEED = 2            # int: seed of this simulation.
+SEED = 5           # int: seed of this simulation.
 
-N_DRONES = 2  # int: number of drones. # ***
+N_DRONES = 6  # int: number of drones. # ***
 ENV_WIDTH = 1500      # float: meters, width of environment.
 ENV_HEIGHT = 1500     # float: meters, height of environment.
 
