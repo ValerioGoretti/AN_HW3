@@ -103,9 +103,9 @@ class AI_Collision_1811110(BASE_routing):
             #TODO AI MARCO---------------------------------------
             return-1
         #When the simulation is going to end, come back
-        #TODO NUOVO IS TIME TO GO BACK---------------------------
         if self.is_time_to_goback():
-            return -1
+            dest_depot_action = -1 if self.closest_depot(self.drone) == (750, 0) else -2
+            return dest_depot_action
         #Set of the first waypoint
         if self.first_waypoint==None:
             self.first_waypoint=self.drone.next_target()
@@ -132,8 +132,9 @@ class AI_Collision_1811110(BASE_routing):
             self.counter+=1
             if self.drone_path.index(self.drone.next_target()) == 0 and self.drone.buffer_length() >= 3:
                 return -1
-        if self.drone.next_target()==self.simulator.depot.list_of_coords[0]:
-            return -1
+        if self.drone.next_target()==self.simulator.depot.list_of_coords[0] or self.drone.next_target()==self.simulator.depot.list_of_coords[1]:
+            dst_depot = -1 if self.drone.next_target == (750, 0) else -2
+            return dst_depot
         #Code used for the AI choice, when there is a collision
         drone=None
        # if self.drone.identifier==0:
@@ -170,22 +171,23 @@ class AI_Collision_1811110(BASE_routing):
                 self.correct_trasmission_error(pkd,cell_index)
         return drone # here you should return a drone object!
     #Function used to know if from the next target i have enough time to come back
-    #TODO CAMBIARE CON VERSIONE NUOVA
-    def arrival_time(self, drone):
-        tot=(util.euclidean_distance(drone.next_target(), drone.coords) / drone.speed)+(util.euclidean_distance(drone.next_target(), self.simulator.depot.list_of_coords[0])/drone.speed)
-        return tot 
+    def arrival_time(self, drone, depot_coords):
+        tot = (util.euclidean_distance(drone.next_target(), drone.coords) / drone.speed) + (
+                    util.euclidean_distance(drone.next_target(), depot_coords) / drone.speed)
+        return tot
     #Function used to knwo when the simulation is going to end , and its time to come back to the depot
-    #TODO CAMBIARE CON VERSIONE NUOVA
     def is_time_to_goback(self):
-        time_expected=self.arrival_time(self.drone)
-        end_expected=self.simulator.len_simulation*self.simulator.time_step_duration-(self.simulator.cur_step*self.simulator.time_step_duration)
-        return time_expected>end_expected
-    #Function that says if a pkd is expiring
-    #TODO ELIMINARE
+        time_expected = self.arrival_time(self.drone, self.closest_depot(self.drone))
+        end_expected = self.simulator.len_simulation * self.simulator.time_step_duration - (
+                    self.simulator.cur_step * self.simulator.time_step_duration)
+        return time_expected > end_expected
+
+    '''Function that says if a pkd is expiring
     def is_packet_expiring(self,pkd):
         time_left=8000*self.simulator.time_step_duration-(self.simulator.cur_step*self.simulator.time_step_duration-pkd.time_step_creation*self.simulator.time_step_duration)
         expected_time=self.arrival_time(self.drone)
-        return expected_time>time_left
+        return expected_time>time_left'''
+    
     #Function for the lap counting
     def lap_counter(self,globalHistory):
         if globalHistory==[]:
