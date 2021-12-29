@@ -96,14 +96,13 @@ class AI_Collision_1811110(BASE_routing):
     def relay_selection(self, opt_neighbors, pkd):
         """ arg min score  -> geographical approach, take the drone closest to the depot """
         #Current cell/state
-        
         cell_index = util.TraversedCells.coord_to_cell(size_cell=self.simulator.prob_size_cell,
                                                         width_area=self.simulator.env_width,
                                                         x_pos=self.drone.coords[0],  # e.g. 1500
                                                         y_pos=self.drone.coords[1])[0]  # e.g. 500
 
         #If there are 10 or more packets, come back
-        if self.last_choice_index != 1 and self.last_choice_index != 2 and self.drone.buffer_length() >= 3 or self.last_choice_index == 0:
+        if self.last_choice_index != 1 and self.last_choice_index != 2 and self.drone.buffer_length() >= 8 or self.last_choice_index == 0:
             return self.q_back(cell_index)
         #Update of the next state, for the previous actions
         self.update_next_state(cell_index)
@@ -195,6 +194,7 @@ class AI_Collision_1811110(BASE_routing):
             if cell_index not in self.q_dict.keys():
                 # choose a random action (action_index => index of the action in Q_table, 0 for None, 1 for -1)
                 action_index = random.choice([0, 1])
+                print("torno per l'AI")
                 if action_index == 1:
                     # randomly chooses which depot to go to
                     action_index = random.choice([1, 2])
@@ -250,7 +250,6 @@ class AI_Collision_1811110(BASE_routing):
             max_time = self.get_max_time_to_depot_and_return(drone, destination_depot)
             # set the last choice made to none
             self.last_choice_index = None
-            print(drone, self.state_action_list)
             for state, action_index, step in reversed(self.state_action_list):
                 # packets that the drone had in a specific state
                 pk_state = set(self.state_action_packets[state])
