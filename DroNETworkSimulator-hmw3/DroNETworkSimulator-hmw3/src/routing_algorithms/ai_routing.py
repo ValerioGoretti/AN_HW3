@@ -93,8 +93,10 @@ class AIRouting(BASE_routing):
             dest_depot_action = -1 if self.closest_depot(self.drone) == (750, 0) else -2
             return dest_depot_action
 
+
 #########################################################################################################################
-        self.q_back(cell_index)
+        if self.last_choice_index != 1 and self.last_choice_index != 2 and len(self.packet_generation) >= 10:
+            return self.q_back(cell_index)
 ##########################################################################################################################
 
         action = None
@@ -120,63 +122,61 @@ class AIRouting(BASE_routing):
     def q_back(self, cell_index):
         # TODO mettere fuori dalla funzione
         # if a packet is expiring apply the reinforcement learning
-        if self.last_choice_index != 1 and self.last_choice_index != 2 or len(self.drone.all_packets()) >= 10:
-            # check if the drone has already taken an action in this sequence for the current state (cell)
-            if cell_index not in [x[0] for x in self.state_action_list]:
-                if cell_index not in self.q_dict.keys():
-                    # choose a random action (action_index => index of the action in Q_table, 0 for None, 1 for -1)
+        # check if the drone has already taken an action in this sequence for the current state (cell)
+        if cell_index not in [x[0] for x in self.state_action_list]:
+            if cell_index not in self.q_dict.keys():
+                # choose a random action (action_index => index of the action in Q_table, 0 for None, 1 for -1)
+                action_index = random.choice([0, 1])
+                if action_index == 1:
+                    # randomly chooses which depot to go to
+                    action_index = random.choice([1, 2])
+                # add the new state to the dict
+                self.q_dict[cell_index] = [0, 0, 0]
+            # if the state already exists choose the best action in q_dict
+            else:
+                is_random_choice = random.choices([True, False], weights=(10, 90), k=1)[0]
+                if is_random_choice or self.q_dict[cell_index][0] == self.q_dict[cell_index][1] == self.q_dict[cell_index][2]:
+                    # make a random choice, 0 for keeping the packets, 1 for coming back to depot
                     action_index = random.choice([0, 1])
                     if action_index == 1:
                         # randomly chooses which depot to go to
                         action_index = random.choice([1, 2])
-                    # add the new state to the dict
-                    self.q_dict[cell_index] = [0, 0, 0]
-                # if the state already exists choose the best action in q_dict
                 else:
-                    is_random_choice = random.choices([True, False], weights=(10, 90), k=1)[0]
-                    if is_random_choice or self.q_dict[cell_index][0] == self.q_dict[cell_index][1] == self.q_dict[cell_index][2]:
-                        # make a random choice, 0 for keeping the packets, 1 for coming back to depot
-                        action_index = random.choice([0, 1])
-                        if action_index == 1:
-                            # randomly chooses which depot to go to
-                            action_index = random.choice([1, 2])
-                    else:
-                        # make the best choice among those available
-                        action_index = self.q_dict[cell_index].index(max(self.q_dict[cell_index]))
+                    # make the best choice among those available
+                    action_index = self.q_dict[cell_index].index(max(self.q_dict[cell_index]))
 
-                # add the new (state, action) tuple to be updated
-                self.state_action_list.append((cell_index, action_index, self.simulator.cur_step))
+            # add the new (state, action) tuple to be updated
+            self.state_action_list.append((cell_index, action_index, self.simulator.cur_step))
 
-                # store all the packets that the drone has when it takes an action
-                self.state_action_packets[cell_index] = [x.event_ref.identifier for x in self.drone.all_packets()]
+            # store all the packets that the drone has when it takes an action
+            self.state_action_packets[cell_index] = [x.event_ref.identifier for x in self.drone.all_packets()]
 
-                if action_index == 1 or action_index == 2:
-                    # set the index of the last choice made, 1 for coming back to one depot
-                    self.last_choice_index = action_index
-                    # set the destination depot
-                    destination_depot_action = -1 if action_index == 1 else -2
-                    # set the destination depot coords
-                    destination_depot_coords = (750, 0) if action_index == 1 else (750, 1400)
-                    # store the time needed to go and return to depot from the current point
-                    self.final_time_to_depot = self.time_to_depot_and_return(self.drone, destination_depot_coords)
-                    return destination_depot_action
-                else:
-                    # set the index of the last choice made, 0 for keeping the packet
-                    self.last_choice_index = 0
-                    return None
+            if action_index == 1 or action_index == 2:
+                # set the index of the last choice made, 1 for coming back to one depot
+                self.last_choice_index = action_index
+                # set the destination depot
+                destination_depot_action = -1 if action_index == 1 else -2
+                # set the destination depot coords
+                destination_depot_coords = (750, 0) if action_index == 1 else (750, 1400)
+                # store the time needed to go and return to depot from the current point
+                self.final_time_to_depot = self.time_to_depot_and_return(self.drone, destination_depot_coords)
+                return destination_depot_action
+            else:
+                # set the index of the last choice made, 0 for keeping the packet
+                self.last_choice_index = 0
+                return None
 
     def q_back_feedback(self, drone):
         # if the last choice was taken by the AI and the buffer length is larger than 0,
         # then update Q table for all (state, action) in the sequence without reward
-        if drone.buffer_length() != 0 and drone == self.drone and self.last_choice_index == 1 or self.last_choice_index == 2:
-            print("sono nel feedback")
+        if len(self.packet_generation) != 0 and drone == self.drone and self.last_choice_index == 1 or self.last_choice_index == 2:
             # set the future state for the final (state, action) in the sequence
             future_state = None
             # packets delivered when the drone moved directly to the depot
             delivered_packets = set([x.event_ref.identifier for x in drone.all_packets()])
             # empty the packets buffer
             drone.empty_buffer()
-
+            # get the destination depot from the last_choice_index
             destination_depot = (750, 0) if self.last_choice_index == 1 else (750, 1400)
             # maximum time the drone would take to go and return to the depot from the farthest point of the map
             max_time = self.get_max_time_to_depot_and_return(drone, destination_depot)
@@ -195,7 +195,6 @@ class AIRouting(BASE_routing):
                 delivered_packets_percent = (pk_state_delivered_num * 100) / pk_state_num
                 # call to the reward function
                 reward = self.reward_function(delivered_packets_percent, max_time)
-                print(reward)
                 # formula for updating the Q table
                 self.q_dict[state][action_index] = self.q_dict[state][action_index] + self.alpha * (reward + self.gamma * max(self.q_dict[future_state]) - self.q_dict[state][action_index])
                 # updating of the evaluation dictionary
