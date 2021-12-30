@@ -5,8 +5,8 @@ import datetime as dt
 import numpy as np
 
 
-CODE_TO_RUN = "python3 -m src.experiments.experiment_ndrones -nd {} -i_s {} -e_s {} -alg {}"
-PLOT_CODE = "python3 -m src.experiments.json_and_plot -i_s {} -e_s {} "
+CODE_TO_RUN = "python -m src.experiments.experiment_ndrones -nd {} -i_s {} -e_s {} -alg {}"
+PLOT_CODE = "python -m src.experiments.json_and_plot -i_s {} -e_s {} "
 NUM_CORE = 8
 
 def run_in_parallel(algorithms, drones, seeds, num_core, code):

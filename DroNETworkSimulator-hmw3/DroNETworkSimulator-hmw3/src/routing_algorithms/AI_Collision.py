@@ -101,7 +101,7 @@ class AI_Collision_1811110(BASE_routing):
                                                         x_pos=self.drone.coords[0],  # e.g. 1500
                                                         y_pos=self.drone.coords[1])[0]  # e.g. 500
 
-        #If there are 10 or more packets, come back
+        #If there are 8 or more packets, apply the RL on choices of coming back to depot
         if self.last_choice_index != 1 and self.last_choice_index != 2 and self.drone.buffer_length() >= 8 or self.last_choice_index == 0:
             return self.q_back(cell_index)
         #Update of the next state, for the previous actions
@@ -187,8 +187,6 @@ class AI_Collision_1811110(BASE_routing):
         return drone # here you should return a drone object!
 
     def q_back(self, cell_index):
-        # TODO mettere fuori dalla funzione
-        # if a packet is expiring apply the reinforcement learning
         # check if the drone has already taken an action in this sequence for the current state (cell)
         if cell_index not in [x[0] for x in self.state_action_list]:
             if cell_index not in self.q_dict.keys():

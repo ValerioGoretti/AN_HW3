@@ -28,7 +28,7 @@ Attributes that one needs tweak often are tagged with # ***
 # ----------------------------------------------------------------------------------
 
 # ----------------------- PATH DRONES -----------------------------------------#
-SWEEP_PATH = False
+SWEEP_PATH = True
 LENGHT_METERS_TOUR = 30000 # (DO NOT CHANGE)
 HOVERING = 600  # int : steps of hovering
 CIRCLE_PATH = False # bool: whether to use cirlce paths around the depot
@@ -47,7 +47,7 @@ DEBUG = False                         # bool: whether to print debug strings or 
 EXPERIMENTS_DIR = "data/experiments/"  # output data : the results of the simulation
 
 # drawaing
-PLOT_SIM = True      # bool: whether to plot or not the simulation.
+PLOT_SIM = False      # bool: whether to plot or not the simulation.
 WAIT_SIM_STEP = 0     # float: seconds, pauses the rendering for 'DELAY_PLOT' seconds.
 SKIP_SIM_STEP = 5     # int: steps, plot the simulation every 'RENDERING_STEP' steps. At least 1.
 DRAW_SIZE = 700       # int: size of the drawing window.
@@ -63,7 +63,7 @@ SIM_DURATION = 15000 # int: steps of simulation. # ***
 TS_DURATION = 0.150   # float: seconds duration of a step in seconds.
 SEED = 5           # int: seed of this simulation.
 
-N_DRONES = 6  # int: number of drones. # ***
+N_DRONES = 3  # int: number of drones. # ***
 ENV_WIDTH = 1500      # float: meters, width of environment.
 ENV_HEIGHT = 1500     # float: meters, height of environment.
 
@@ -77,7 +77,7 @@ P_FEEL_EVENT = .8       # float: probability that the drones feels the event gen
 # drones
 COMMUNICATION_RANGE_DRONE = 200  # float: meters, communication range of the drones.
 SENSING_RANGE_DRONE = 0        # float: meters, the sensing range of the drones.
-DRONE_SPEED = 8                  # float: m/s, drone speed.
+DRONE_SPEED = 20                  # float: m/s, drone speed.
 DRONE_MAX_BUFFER_SIZE = 100     # int: max number of packets in the buffer of a drone.
 DRONE_MAX_ENERGY = 12000000           # int: max energy of a drone, possible travelled distance (meters)
 DRONE_MIN_FLIGHT_TIME = 3200000  #  possible travelled distance (meters)
