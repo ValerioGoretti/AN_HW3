@@ -26,7 +26,7 @@ if __name__ == "__main__":
     ALGO_TO_RUN = ["AI", "MGEO", "GEO"] # run algorithms
     NDRONES = [2, 5, 10,20, 30] # 15, 20, 30, 40
     NSEEDS = 10  # 30
-    #run_in_parallel(ALGO_TO_RUN, NDRONES, NSEEDS, NUM_CORE, CODE_TO_RUN)
+    run_in_parallel(ALGO_TO_RUN, NDRONES, NSEEDS, NUM_CORE, CODE_TO_RUN)
 
     # plot
     algo_command = "-exp_suffix "

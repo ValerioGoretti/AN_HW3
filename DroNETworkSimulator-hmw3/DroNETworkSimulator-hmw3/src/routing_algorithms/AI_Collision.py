@@ -192,7 +192,6 @@ class AI_Collision_1811110(BASE_routing):
             if cell_index not in self.q_dict.keys():
                 # choose a random action (action_index => index of the action in Q_table, 0 for None, 1 for -1)
                 action_index = random.choice([0, 1])
-                print("torno per l'AI")
                 if action_index == 1:
                     # randomly chooses which depot to go to
                     action_index = random.choice([1, 2])
