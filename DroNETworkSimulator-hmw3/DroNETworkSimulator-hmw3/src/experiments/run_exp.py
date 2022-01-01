@@ -23,10 +23,11 @@ def run_process(process):
 
 if __name__ == "__main__":
     # execution
-    ALGO_TO_RUN = ["AI", "MGEO", "GEO"] # run algorithms
-    NDRONES = [2, 5, 10,20, 30] # 15, 20, 30, 40
+    #ALGO_TO_RUN = ["AI", "MGEO", "GEO"] # run algorithms
+    ALGO_TO_RUN = ["AI_5", "AI_8", "AI_10"] # run algorithms
+    NDRONES = [2, 5, 10, 20, 30] # 15, 20, 30, 40
     NSEEDS = 10  # 30
-    run_in_parallel(ALGO_TO_RUN, NDRONES, NSEEDS, NUM_CORE, CODE_TO_RUN)
+    #run_in_parallel(ALGO_TO_RUN, NDRONES, NSEEDS, NUM_CORE, CODE_TO_RUN)
 
     # plot
     algo_command = "-exp_suffix "

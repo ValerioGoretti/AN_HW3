@@ -5,6 +5,10 @@ from src.routing_algorithms.random_routing import RandomRouting
 from src.routing_algorithms.closeset_to_me_routing import CloRouting
 from src.routing_algorithms.ai_routing import AIRouting
 from src.routing_algorithms.AI_Collision import AI_Collision_1811110
+from src.routing_algorithms.AI_Collision_5 import AI_Collision_1811110_5
+from src.routing_algorithms.AI_Collision_8 import AI_Collision_1811110_8
+from src.routing_algorithms.AI_Collision_10 import AI_Collision_1811110_10
+
 
 from enum import Enum
 
@@ -97,6 +101,9 @@ class RoutingAlgorithm(Enum):
     MGEO = GeoMoveRouting
     CLO = CloRouting
     AI = AI_Collision_1811110
+    AI_5 = AI_Collision_1811110_5
+    AI_8 = AI_Collision_1811110_8
+    AI_10 = AI_Collision_1811110_10
 
     @staticmethod
     def keylist():
