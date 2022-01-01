@@ -58,6 +58,10 @@ class AI_Collision_1811110(BASE_routing):
         self.last_choice_index = None
         # dictionary to store evaluation info {timestep : reward}
         self.evaluation_dict = {}
+
+        '''self.reward_counter = 0
+        self.cumulative_reward = 0'''
+
     def feedback(self, drone, id_event, delay, outcome, depot_index=None):
         """ return a possible feedback, if the destination drone has received the packet """
         if config.DEBUG:
@@ -102,7 +106,7 @@ class AI_Collision_1811110(BASE_routing):
                                                         y_pos=self.drone.coords[1])[0]  # e.g. 500
 
         #If there are 8 or more packets, apply the RL on choices of coming back to depot
-        if self.last_choice_index != 1 and self.last_choice_index != 2 and self.drone.buffer_length() >= 8 or self.last_choice_index == 0:
+        if self.last_choice_index != 1 and self.last_choice_index != 2 and self.drone.buffer_length() >= 10 or self.last_choice_index == 0:
             return self.q_back(cell_index)
         #Update of the next state, for the previous actions
         self.update_next_state(cell_index)
@@ -266,6 +270,11 @@ class AI_Collision_1811110(BASE_routing):
                 self.evaluation_dict[step] = reward
                 # set the next future state
                 future_state = state
+                '''if self.drone == drone and self.drone.identifier == 1:
+                    self.cumulative_reward += reward
+                    self.reward_counter += 1
+                    print(reward, " ", self.cumulative_reward / self.reward_counter)'''
+
             # set the final time to 0
             self.final_time_to_depot = 0
             # empty state action

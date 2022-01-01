@@ -61,9 +61,9 @@ SAVE_PLOT_DIR = "data/plots/"
 # ----------------------------- SIMULATION PARAMS. ---------------------------- #
 SIM_DURATION = 48000 # int: steps of simulation. # ***
 TS_DURATION = 0.150   # float: seconds duration of a step in seconds.
-SEED = 5           # int: seed of this simulation.
+SEED = 2           # int: seed of this simulation.
 
-N_DRONES = 3  # int: number of drones. # ***
+N_DRONES = 5  # int: number of drones. # ***
 ENV_WIDTH = 1500      # float: meters, width of environment.
 ENV_HEIGHT = 1500     # float: meters, height of environment.
 
@@ -77,7 +77,7 @@ P_FEEL_EVENT = .8       # float: probability that the drones feels the event gen
 # drones
 COMMUNICATION_RANGE_DRONE = 200  # float: meters, communication range of the drones.
 SENSING_RANGE_DRONE = 0        # float: meters, the sensing range of the drones.
-DRONE_SPEED = 20                  # float: m/s, drone speed.
+DRONE_SPEED = 8                  # float: m/s, drone speed.
 DRONE_MAX_BUFFER_SIZE = 100     # int: max number of packets in the buffer of a drone.
 DRONE_MAX_ENERGY = 12000000           # int: max energy of a drone, possible travelled distance (meters)
 DRONE_MIN_FLIGHT_TIME = 3200000  #  possible travelled distance (meters)
