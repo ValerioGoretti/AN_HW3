@@ -63,7 +63,7 @@ SAVE_PLOT_DIR = "data/plots/"
 
 # add constants here...
 # ----------------------------- SIMULATION PARAMS. ---------------------------- #
-SIM_DURATION = 48000 # int: steps of simulation. # ***
+SIM_DURATION = 500000 # int: steps of simulation. # ***
 TS_DURATION = 0.150   # float: seconds duration of a step in seconds.
 SEED = 2           # int: seed of this simulation.
 
