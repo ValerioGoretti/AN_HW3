@@ -5,8 +5,6 @@ from matplotlib import pyplot as plt
 from src.utilities import config
 import random
 import time
-
-
 class AI_Collision_1811110(BASE_routing):
     def __init__(self, drone, simulator):
         BASE_routing.__init__(self, drone, simulator)
@@ -45,7 +43,6 @@ class AI_Collision_1811110(BASE_routing):
         self.gamma = 0.8
         # Dictionary for the convergence test
         self.reward_dictionary = {}
-        ##############################################################
         # dictionary for the Q table
         self.q_dict = {None: [0, 0, 0]}
         # list to store the sequence of (state, action) that must get a reward
@@ -65,9 +62,7 @@ class AI_Collision_1811110(BASE_routing):
             print("Drone: ", self.drone.identifier, "---------- has delivered: ", self.taken_actions)
             print("Drone: ", self.drone.identifier, "---------- just received a feedback:",
                   "Drone:", drone, " - id-event:", id_event, " - delay:", delay, " - outcome:", outcome)
-
         self.q_back_feedback(drone)
-
         actual_time = self.simulator.cur_step
         # Update of the list of the packet sorted by their generation
         if id_event in self.packet_set and drone == self.drone:
@@ -102,11 +97,11 @@ class AI_Collision_1811110(BASE_routing):
                                                        width_area=self.simulator.env_width,
                                                        x_pos=self.drone.coords[0],  # e.g. 1500
                                                        y_pos=self.drone.coords[1])[0]  # e.g. 500
-
-        # If there are 8 or more packets, apply the RL on choices of coming back to depot
         if self.last_choice_index != 1 and self.last_choice_index != 2 and self.drone.buffer_length() >= 10 or self.last_choice_index == 0:
+            
+            #Coming Back Module
             return self.q_back(cell_index)
-        # Update of the next state, for the previous actions
+        # Update of the next state (collision), for the previous actions
         self.update_next_state(cell_index)
         # Inizialition of the taken_actions dictionary for the current cell
         self.initialize_state_action(pkd, cell_index)
@@ -156,8 +151,6 @@ class AI_Collision_1811110(BASE_routing):
             return dst_depot
         # Code used for the AI choice, when there is a collision
         drone = None
-        # if self.drone.identifier==0:
-        #    print(self.check_near_upper_depot())
         if len(opt_neighbors) > 0:
             # If the drone has never received the pkd....
             if self.drone_not_seen([v[1] for v in opt_neighbors], pkd):
@@ -192,7 +185,7 @@ class AI_Collision_1811110(BASE_routing):
         return drone  # here you should return a drone object!
 
     def q_back(self, cell_index):
-        # check if the drone has already taken an action in this sequence for the current state (cell)
+        # check if the drone has already taken an action in this sequence for the current state
         if cell_index not in [x[0] for x in self.state_action_list]:
             if cell_index not in self.q_dict.keys():
                 # choose a random action (action_index => index of the action in Q_table, 0 for None, 1 for -1)
@@ -315,33 +308,23 @@ class AI_Collision_1811110(BASE_routing):
             return self.simulator.depot.list_of_coords[0]
         else:
             return self.simulator.depot.list_of_coords[1]
-
-    '''Function that says if a pkd is expiring
-    def is_packet_expiring(self,pkd):
-        time_left=8000*self.simulator.time_step_duration-(self.simulator.cur_step*self.simulator.time_step_duration-pkd.time_step_creation*self.simulator.time_step_duration)
-        expected_time=self.arrival_time(self.drone)
-        return expected_time>time_left'''
-
     # Function for the lap counting
     def lap_counter(self, globalHistory):
         if globalHistory == []:
             return 1
         count_list = [x for x in globalHistory if x == globalHistory[0]]
         return len(count_list)
-
     # Function used to perform a random action in the epsilon greedy policy
     def perform_random_action(self, opt_neighbors, cell, pkd):
         opt2 = [x[1] for x in opt_neighbors]
         randomChoice = self.untaken_drone(opt2, pkd)
         return randomChoice
-
     # Function that choose a random drone which has not already received the given pkd, during a collision
     def untaken_drone(self, opt_neighbors, pkd):
         while True:
             drone = self.simulator.rnd_routing.choice(opt_neighbors)
             if drone.identifier not in pkd.hops:
                 return drone
-
     def drone_not_seen(self, opt_neighbors, pkd):
         for collision in opt_neighbors:
             if collision.identifier not in pkd.hops:
@@ -448,10 +431,7 @@ class AI_Collision_1811110(BASE_routing):
     # Function used for the epsilon greedy implementation. It choice the past action for the given cell, that has the
     # highest q value
     def perform_greedy_action(self, cell):
-        give_away = self.qTable_dictionary[(cell, True)]
-        keep_packet = self.qTable_dictionary[(cell, False)]
-        return max([(x[0], self.qTable_dictionary[x]) for x in self.qTable_dictionary.keys() if x[0] == cell],
-                   key=lambda x: x[1])
+        return max([(x[0], self.qTable_dictionary[x]) for x in self.qTable_dictionary.keys() if x[0] == cell],key=lambda x: x[1])
 
     # Function used to update the dictionary for the convergence test
     def update_step_reward_dictionary(self, reward, cur_step):
@@ -465,5 +445,4 @@ class AI_Collision_1811110(BASE_routing):
                self.simulator.depot.list_of_coords[1]
 
     def check_near_upper_depot(self):
-        print("----------------", self.drone.next_target()[1], int(self.drone.coords[1]), self.drone.buffer_length())
         return self.drone.next_target()[1] < self.drone.return_coords[1] and self.drone.buffer_length() >= 3
